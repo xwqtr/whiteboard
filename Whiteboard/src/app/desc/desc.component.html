@@ -1,0 +1,3 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<canvas #canvasItself (change)='getCanvasData(canvasItself);' (mouseup)='endPaint();' (mousedown)='startPaint();'
+  (mouseleave)='cursorOut();' (mousemove)='paintStuff($event,canvasItself)' id="Desc" class="desc"></canvas>
