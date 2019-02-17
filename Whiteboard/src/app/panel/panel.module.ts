@@ -1,16 +1,17 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { DescComponent } from './desc.component';
+import { PanelComponent } from './panel.component';
+
 @NgModule({
   declarations: [
-    DescComponent
+    PanelComponent
   ],
   imports: [
     BrowserModule
   ],
   providers: [],
-  bootstrap: [DescComponent]
+  bootstrap: [PanelComponent]
 })
-export class DescModule {
+export class PanelModule {
 
 }
