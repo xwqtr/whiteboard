@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+      "typeRoots" : ["./node_modules/@types", "./typings"],
+      "target": "es5",
+      "module": "commonjs",
+      "outDir": "out",
+      "sourceMap": true
+    }
+}

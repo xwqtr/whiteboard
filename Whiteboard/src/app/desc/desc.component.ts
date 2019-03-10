@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 
 import { PanelComponent } from '../panel/panel.component';
-
 @Component({
   selector: 'app-desc',
   templateUrl: './desc.component.html',
@@ -13,6 +12,7 @@ export class DescComponent {
   private _timeToPaint = false;
   private prevX = 0;
   private prevY = 0;
+  private sessionId: string = null;
   @Input() panel: PanelComponent;
 
 
@@ -21,6 +21,9 @@ export class DescComponent {
   // constructor() {
   //   _panel = panel;
   // }
+  getCanvasData() {
+    return this._canvasContext.getImageData(0, 0, this._canvasContext.canvas.width, this._canvasContext.canvas.height);
+  }
   startPaint() {
     this._timeToPaint = true;
   }
