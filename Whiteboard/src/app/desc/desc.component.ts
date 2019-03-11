@@ -18,11 +18,9 @@ export class DescComponent {
 
   private _color = () => this.panel.color;
   private _width = () => this.panel.lineWidth;
-  // constructor() {
-  //   _panel = panel;
-  // }
-  getCanvasData() {
-    return this._canvasContext.getImageData(0, 0, this._canvasContext.canvas.width, this._canvasContext.canvas.height);
+  private updateData() {
+    const d = this._canvas.toDataURL();
+    this.panel.syncData(d);
   }
   startPaint() {
     this._timeToPaint = true;
@@ -31,6 +29,7 @@ export class DescComponent {
     this._timeToPaint = false;
     this.prevX = 0;
     this.prevY = 0;
+    this.updateData();
   }
   cursorOut() {
     this.prevX = 0;

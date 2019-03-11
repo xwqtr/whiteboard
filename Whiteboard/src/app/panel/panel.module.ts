@@ -7,7 +7,7 @@ import { PanelComponent } from './panel.component';
     PanelComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
   ],
   providers: [],
   bootstrap: [PanelComponent]

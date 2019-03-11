@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "dependencies": {
         "@types/mongodb": "^3.1.22",
-        "body-parser": "^1.18.0",
+        "body-parser": "^1.18.3",
         "express": "^4.16.4",
         "mocha": "^6.0.2",
         "mongodb": "^3.1.0"
