@@ -17,24 +17,25 @@ app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '5000mb' }));
 app.use(bodyParser.urlencoded({
-    extended: true
+    extended: true,
+    limit: '5000mb'
 }));
-app.use(express.json({ limit: '50mb' }));
 mongoClient.connect().then(function (x) {
     var db = x.db(dbName);
     var collection = db.collection(collectionName);
     var syncService = new SynchronizationService_1.SynchronizationService(collection);
     app.post('/sync', function (req, response) {
         syncService.TrySync(req.body).then(function (x) {
+            // console.log(x);
             var data = JSON.stringify(x);
             response.end(data);
         }).catch(function (x) { return util_1.log(x); });
     });
-    app.get('/get', function (req, response) {
-        var someid = "";
-        syncService.GetData(someid).then(function (z) {
+    app.post('/get', function (req, response) {
+        syncService.GetData(req.body.Id).then(function (z) {
+            console.log(z);
             var data = JSON.stringify(z);
             response.end(data);
         }).catch(function (x) { return util_1.log(x); });

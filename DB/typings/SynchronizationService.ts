@@ -10,14 +10,14 @@ import {
 import { Collection } from 'mongodb';
 export class SynchronizationService {
 
-    
+
     private readonly _dbSyncData: Collection<SyncData>;
     constructor(data: Collection<SyncData>) {
         this._dbSyncData = data;
 
     }
-    public async TrySync(syncData: SyncData):  Promise<SyncData> {
-        if (syncData.Id != null || syncData.Id=='') {
+    public async TrySync(syncData: SyncData): Promise<SyncData> {
+        if (syncData.Id != null && syncData.Id != '') {
             return await this.syncData(syncData);
         }
         this.insertNewSession(syncData);
@@ -30,24 +30,22 @@ export class SynchronizationService {
         syncData.Id = newId;
         syncData.Time = Date.now();
 
-        
-       await this._dbSyncData.insertOne(syncData, (err, result) => {
 
-                if (err) {
-                    console.log(err)
-                    return null;
-                }
-                console.log(result.ops);
+        await this._dbSyncData.insertOne(syncData, (err, result) => {
 
-            });
-        
+            if (err) {
+                console.log(err)
+                return null;
+            }
+            console.log(result.ops);
+
+        });
+
         return syncData;
     }
 
-    public async GetData(id: string): Promise<SyncData>
-    {
-        let data: SyncData; 
-        return await this._dbSyncData.findOne({Id:id});
+    public GetData(Id: string): Promise<SyncData> {
+        return this._dbSyncData.findOne({ Id: Id });
     }
     private async syncData(syncData: SyncData): Promise<SyncData> {
         const data: SyncData = {
@@ -55,7 +53,7 @@ export class SynchronizationService {
             Time: Date.now(),
             Data: syncData.Data
         }
-        this._dbSyncData.findOneAndUpdate({Id: data.Id},{ $set: {  Time : data.Time, Data: data.Data }});
+        this._dbSyncData.findOneAndUpdate({ Id: data.Id }, { $set: { Time: data.Time, Data: data.Data } });
         return data;
     }
 

@@ -27,27 +27,27 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '5000mb' }));
 app.use(bodyParser.urlencoded({
-    extended: true
+    extended: true,
+    limit: '5000mb'
 }));
-app.use(express.json({limit: '50mb'}));
 mongoClient.connect().then(x => {
 
     const db: Db = x.db(dbName);
-    const collection: Collection < SyncData > = db.collection(collectionName);
+    const collection: Collection<SyncData> = db.collection(collectionName);
     const syncService = new SynchronizationService(collection);
 
     app.post('/sync', (req, response) => {
         syncService.TrySync(req.body).then(x => {
+            // console.log(x);
             var data = JSON.stringify(x);
             response.end(data);
         }).catch(x => log(x));
     })
-    app.get('/get', (req, response) => {
-        const someid = "";
-        syncService.GetData(someid).then(z => {
-
+    app.post('/get', (req, response) => {
+        syncService.GetData(req.body.Id).then(z => {
+            console.log(z);
             var data = JSON.stringify(z);
             response.end(data);
         }).catch(x => log(x));
