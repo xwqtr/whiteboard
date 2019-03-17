@@ -7,9 +7,6 @@ import {
   HttpParams,
   HttpHeaders
 } from '@angular/common/http';
-import {
-  SyncData
-} from '../../../../DB/typings/SyncData';
 
 @Component({
   selector: 'app-panel',

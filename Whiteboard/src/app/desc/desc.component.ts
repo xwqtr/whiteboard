@@ -1,49 +1,38 @@
-import { Component, Input, DoCheck, KeyValueDiffers } from '@angular/core';
-import { SyncData } from '../../../../DB/typings/SyncData';
+import { Component, Input, OnInit} from '@angular/core';
 import { PanelComponent } from '../panel/panel.component';
-import { timer } from 'rxjs';
-import { SyncService } from '../common/syncService';
-import { HttpClient } from '@angular/common/http';
-
+import * as io from 'socket.io-client';
 @Component({
   selector: 'app-desc',
   templateUrl: './desc.component.html',
   styleUrls: ['./desc.component.css']
 })
-export class DescComponent implements DoCheck {
+
+
+export class DescComponent implements OnInit {
+  
+  private syncServerUrl = 'http://localhost:3001';
   private _canvas: HTMLCanvasElement;
   private _canvasContext: CanvasRenderingContext2D;
   private _timeToPaint = false;
   private prevX = 0;
   private prevY = 0;
+  private socket: SocketIOClient.Socket;
   private sessionId: string = document.location.pathname.substr(1);
-  private _data: SyncData = { Id: this.sessionId, Time: null, Data: null };
-  private timer = timer(1000, 2000);
-  private _ss: SyncService;
   @Input() panel: PanelComponent;
-  differ: any;
-
-
-  constructor(private differs: KeyValueDiffers, private http: HttpClient) {
-    this._ss = new SyncService(http);
-    this.differ = this.differs.find({}).create();
-    this.timer.subscribe(x => this._ss.getData(this._data));
-    if (this._data.Id && this._data.Id !== '') {
-      this._ss.getData(this._data);
-    } else {
-      this._ss.syncData(this._data);
+  ngOnInit(): void {
+    debugger;
+    if(this.sessionId!=null&& this.sessionId!=''){
+      debugger;
+      this.panel._shareUrl = document.location.protocol+"//"+ document.location.host+"/" + this.socket.id;
+      this.socket.id = this.sessionId;
     }
+    
   }
-  ngDoCheck(): void {
-    const d = this._data;
-    const p = () => this.panel;
-    const change = this.differ.diff(d);
-    if (change) {
-      change.forEachChangedItem(item => {
-        this.updateCanvasFromDataUrl(d.Data);
-        p()._shareUrl = d.Id;
+  constructor() {
+      this.socket = io.connect(this.syncServerUrl);
+      this.socket.on('syncData', (data) =>{ 
+      this.updateCanvasFromDataUrl(data);
       });
-    }
   }
   updateCanvasFromDataUrl(du: string) {
     if (du && this._canvas) {
@@ -62,22 +51,22 @@ export class DescComponent implements DoCheck {
   private _width = () => this.panel.lineWidth;
   private updateData() {
     const d = this._canvas.toDataURL();
-    this._data.Data = d;
-    this._ss.syncData(this._data);
+    this.socket.emit('syncData', d); 
+    this.panel._shareUrl = document.location.protocol+"//"+ document.location.host+"/" + this.socket.id ;
+    
+    
   }
 
   startPaint() {
     this._timeToPaint = true;
   }
   endPaint() {
-    this._timeToPaint = false;
     this.prevX = 0;
     this.prevY = 0;
+    this._timeToPaint = false;
     this.updateData();
   }
   cursorOut() {
-    this.prevX = 0;
-    this.prevY = 0;
     this.endPaint();
   }
   paintStuff(event: MouseEvent, canvas: HTMLCanvasElement) {
@@ -88,7 +77,6 @@ export class DescComponent implements DoCheck {
       this._canvasContext.canvas.height = window.innerHeight;
     }
     if (this._timeToPaint) {
-      console.log('X:' + event.layerX + ' Y:' + event.layerY);
       if (this.prevX === 0 && this.prevY === 0) {
         this.prevX = event.layerX;
         this.prevY = event.layerY;
