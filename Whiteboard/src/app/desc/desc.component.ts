@@ -1,4 +1,4 @@
-import { Component, Input, OnInit} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { PanelComponent } from '../panel/panel.component';
 import * as io from 'socket.io-client';
 @Component({
@@ -9,7 +9,6 @@ import * as io from 'socket.io-client';
 
 
 export class DescComponent implements OnInit {
-  
   private syncServerUrl = 'http://localhost:3001';
   private _canvas: HTMLCanvasElement;
   private _canvasContext: CanvasRenderingContext2D;
@@ -20,13 +19,12 @@ export class DescComponent implements OnInit {
   private sessionId: string = document.location.pathname.substr(1);
   @Input() panel: PanelComponent;
   ngOnInit(): void {
-    
   }
   constructor() {
-      this.socket = io.connect(this.syncServerUrl);
-      this.socket.on('syncData', (data) =>{ 
+    this.socket = io.connect(this.syncServerUrl);
+    this.socket.on('syncData', (data) => {
       this.updateCanvasFromDataUrl(data);
-      });
+    });
   }
   updateCanvasFromDataUrl(du: string) {
     if (du && this._canvas) {
@@ -44,19 +42,17 @@ export class DescComponent implements OnInit {
   private _color = () => this.panel.color;
   private _width = () => this.panel.lineWidth;
   private updateData() {
-    if(this.sessionId==null||this.sessionId=="")
-    {
+    if (this.sessionId == null || this.sessionId == "") {
       var sid = this.socket.id;
     }
-    else
-    {
+    else {
       sid = this.sessionId;
     }
-    const d: SyncData = { id: sid, data:this._canvas.toDataURL()} ;
-    this.socket.emit('syncData', d); 
-    this.panel._shareUrl = document.location.protocol+"//"+ document.location.host+"/" + this.socket.id ;
-    
-    
+    const d: SyncData = { id: sid, data: this._canvas.toDataURL() };
+    this.socket.emit('syncData', d);
+    this.panel._shareUrl = document.location.protocol + "//" + document.location.host + "/" + this.socket.id;
+
+
   }
 
   startPaint() {
