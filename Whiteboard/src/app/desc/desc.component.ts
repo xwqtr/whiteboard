@@ -20,12 +20,6 @@ export class DescComponent implements OnInit {
   private sessionId: string = document.location.pathname.substr(1);
   @Input() panel: PanelComponent;
   ngOnInit(): void {
-    debugger;
-    if(this.sessionId!=null&& this.sessionId!=''){
-      debugger;
-      this.panel._shareUrl = document.location.protocol+"//"+ document.location.host+"/" + this.socket.id;
-      this.socket.id = this.sessionId;
-    }
     
   }
   constructor() {
@@ -50,7 +44,15 @@ export class DescComponent implements OnInit {
   private _color = () => this.panel.color;
   private _width = () => this.panel.lineWidth;
   private updateData() {
-    const d = this._canvas.toDataURL();
+    if(this.sessionId==null||this.sessionId=="")
+    {
+      var sid = this.socket.id;
+    }
+    else
+    {
+      sid = this.sessionId;
+    }
+    const d: SyncData = { id: sid, data:this._canvas.toDataURL()} ;
     this.socket.emit('syncData', d); 
     this.panel._shareUrl = document.location.protocol+"//"+ document.location.host+"/" + this.socket.id ;
     
