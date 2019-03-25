@@ -2,26 +2,26 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 3001;
-var sessions = [];
+
+
+function uuidv4() {
+  return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0,
+      v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 io.on('connection', function (socket) {
+  if (typeof socket._rooms === 'undefined' || socket._rooms.length <= 0) {
+    var guid = uuidv4();
+    socket.join(guid);
+    io.to(guid).emit('connected', guid);
+  }
 
   socket.on('syncData', (data) => {
-    check = sessions.findIndex(s => s.sid == socket.id && s.did == data.id) > -1;
-    if (!check) {
-      sessions.push({
-        sid: socket.id,
-        did: data.id
-      });
-    }
-
-    sessions.forEach(s => {
-      if (s.did == socket.id) {
-        io.to(s.sid).emit('syncData', data.data);
-      }
-    });
-
-    io.to(data.id).emit('syncData', data.data);
+    socket.join(data.id);
+    socket.in(data.id).emit('syncData', data.data);
   });
 
   console.log('a user connected');

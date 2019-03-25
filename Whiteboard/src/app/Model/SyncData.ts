@@ -1,5 +1,4 @@
-interface SyncData
-{
-    id:string;
-    data:string;
+interface SyncData {
+  id: string;
+  data: string;
 }
