@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { PanelComponent } from '../panel/panel.component';
 import * as io from 'socket.io-client';
 @Component({
@@ -8,7 +8,7 @@ import * as io from 'socket.io-client';
 })
 
 
-export class DescComponent implements OnInit {
+export class DescComponent implements OnInit, AfterViewInit {
   private syncServerUrl = 'http://localhost:3001';
   private _canvas: HTMLCanvasElement;
   private _canvasContext: CanvasRenderingContext2D;
@@ -17,23 +17,36 @@ export class DescComponent implements OnInit {
   private prevY = 0;
   private socket: SocketIOClient.Socket;
   private sessionId: string = document.location.pathname.substr(1);
+
+  @ViewChild('canvasItself') canvasItself: ElementRef;
   @Input() panel: PanelComponent;
+  ngAfterViewInit() {
+    this._canvas = <HTMLCanvasElement>this.canvasItself.nativeElement;
+    this._canvasContext = this._canvas.getContext('2d');
+    this._canvasContext.canvas.width = 1200;
+    this._canvasContext.canvas.height = 800;
+    this.socket.emit('getCache');
+  }
   ngOnInit(): void {
-    // tslint:disable-next-line:no-debugger
-    debugger;
+
     if (this.sessionId != null && this.sessionId !== '') {
       this.socket = io.connect(this.syncServerUrl, { query: { roomName: this.sessionId } });
       this.panel._shareUrl = document.location.protocol + '//' + document.location.host + '/' + this.sessionId;
     } else {
       this.socket = io.connect(this.syncServerUrl);
-      this.socket.on('connected', (id) => {
+
+    }
+    this.socket.on('syncData', (data) => {
+
+      this.updateCanvasFromDataUrl(data);
+    });
+    this.socket.on('connected', (id) => {
         this.panel._shareUrl = document.location.protocol + '//' + document.location.host + '/' + id;
         this.sessionId = id;
       });
-    }
-    this.socket.on('syncData', (data) => {
-      this.updateCanvasFromDataUrl(data);
-    });
+
+
+
 
   }
   updateCanvasFromDataUrl(du: string) {
@@ -70,13 +83,7 @@ export class DescComponent implements OnInit {
   cursorOut() {
     this.endPaint();
   }
-  paintStuff(event: MouseEvent, canvas: HTMLCanvasElement) {
-    this._canvas = this._canvas == null ? canvas : this._canvas;
-    if (this._canvasContext == null) {
-      this._canvasContext = this._canvas.getContext('2d');
-      this._canvasContext.canvas.width = window.innerWidth;
-      this._canvasContext.canvas.height = window.innerHeight;
-    }
+  paintStuff(event: MouseEvent) {
     if (this._timeToPaint) {
       if (this.prevX === 0 && this.prevY === 0) {
         this.prevX = event.layerX;
