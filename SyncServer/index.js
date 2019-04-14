@@ -1,10 +1,44 @@
-const app = require('express')();
+const express = require('express');
+const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const port = process.env.PORT || 3001;
+const passport = require('passport');
+
 const imagesCache = {};
 
-
+  app.use(express.static('public'));
+  app.use((req,res,next)=>{
+    express.cookieParser();
+    next();
+  });
+  
+  app.use((req,res,next)=>{
+    express.bodyParser();
+    next();
+  });
+  app.use((req,res,next)=>{
+    express.session({ secret: 'keyboard cat' })
+    next();
+  });
+  app.use(passport.initialize());
+  app.use(passport.session());
+app.post('/login',
+  passport.authenticate('local'),
+  function(req, res) {
+    // If this function gets called, authentication was successful.
+    // `req.user` contains the authenticated user.
+    res.redirect('/');
+  });
+  passport.serializeUser(function(user, done) {
+    done(null, user.id);
+  });
+  
+  passport.deserializeUser(function(id, done) {
+    User.findById(id, function(err, user) {
+      done(err, user);
+    });
+  });
 function updateCache(dataObject) {
   imagesCache[dataObject.id] = dataObject.data;
 }
