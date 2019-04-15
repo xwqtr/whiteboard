@@ -21,9 +21,6 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 //Initiate our app
 const app = express();
-var privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
-var certificate = fs.readFileSync('sslcert/myexport.cer', 'utf8');
-var credentials = {key: privateKey, cert: certificate};
 //Configure our app
 
 app.use(cors());
@@ -89,8 +86,13 @@ passport.deserializeUser(function(id, done) {
 });
 passport.use(rz);
 passport.use(ls);
+
+var options = {
+  pfx: fs.readFileSync('./sslcert/myexport.pfx'),
+  passphrase: 'P@ssw0rd'
+};
 var httpServer = http.createServer(app);
-var httpsServer = https.createServer(credentials, app);
+var httpsServer = https.createServer(options, app);
 
 httpServer.listen(8080);
 httpsServer.listen(8443);
